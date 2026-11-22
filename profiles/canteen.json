@@ -1,0 +1,112 @@
+{
+ "id": "canteen",
+ "label": "Canteen / food stall",
+ "kindLabel": "small food stall",
+ "shop": "Campus Bites",
+ "fulfil": "kitchen",
+ "payWhen": "before",
+ "table": false,
+ "words": {
+  "staff": "Chef",
+  "staffPl": "Chefs",
+  "station": "Kitchen",
+  "working": "cooking",
+  "setup": "Kitchen setup"
+ },
+ "parserRole": "canteen order",
+ "examples": [
+  "\"one samosa and a tea\" -> {\"items\":{\"samosa\":{\"q\":1,\"note\":\"\"},\"chai\":{\"q\":1,\"note\":\"\"}},\"remove\":{},\"checkout\":false,\"clear\":false}",
+  "\"दो बर्गर, बिना प्याज, बस इतना ही\" -> {\"items\":{\"veg_burger\":{\"q\":2,\"note\":\"no onion\"}},\"remove\":{},\"checkout\":true,\"clear\":false}",
+  "\"remove the samosa\" -> {\"items\":{},\"remove\":{\"samosa\":1},\"checkout\":false,\"clear\":false}"
+ ],
+ "items": [
+  {
+   "id": "masala_dosa",
+   "name": "Masala Dosa",
+   "aliases": [
+    "dosa",
+    "डोसा",
+    "மசாலா தோசை",
+    "தோசை"
+   ],
+   "price": 60,
+   "unit": "plate",
+   "step": 1,
+   "pop": 14
+  },
+  {
+   "id": "veg_burger",
+   "name": "Veg Burger",
+   "aliases": [
+    "burger",
+    "बर्गर"
+   ],
+   "price": 50,
+   "unit": "plate",
+   "step": 1,
+   "pop": 9
+  },
+  {
+   "id": "samosa",
+   "name": "Samosa",
+   "aliases": [
+    "समोसा",
+    "சமோசா"
+   ],
+   "price": 15,
+   "unit": "piece",
+   "step": 1,
+   "pop": 20
+  },
+  {
+   "id": "chowmein",
+   "name": "Veg Chowmein",
+   "aliases": [
+    "noodles",
+    "chow mein",
+    "चाउमीन"
+   ],
+   "price": 70,
+   "unit": "plate",
+   "step": 1,
+   "pop": 9
+  },
+  {
+   "id": "paneer_roll",
+   "name": "Paneer Roll",
+   "aliases": [
+    "roll",
+    "रोल"
+   ],
+   "price": 65,
+   "unit": "plate",
+   "step": 1,
+   "pop": 8
+  },
+  {
+   "id": "cold_coffee",
+   "name": "Cold Coffee",
+   "aliases": [
+    "coffee",
+    "कॉफी"
+   ],
+   "price": 45,
+   "unit": "glass",
+   "step": 1,
+   "pop": 14
+  },
+  {
+   "id": "chai",
+   "name": "Chai",
+   "aliases": [
+    "tea",
+    "चाय",
+    "டீ"
+   ],
+   "price": 10,
+   "unit": "cup",
+   "step": 1,
+   "pop": 26
+  }
+ ]
+}

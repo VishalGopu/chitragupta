@@ -1,0 +1,23 @@
+import assert from "node:assert/strict";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+const dir = mkdtempSync(join(tmpdir(), "chitragupta-ins-")); process.env.DATA_DIR = dir;
+const now = Date.now(), day = 86400000, h = new Date(now).setHours(13, 0, 0, 0);
+const o = (n, t, items) => ({ id: "O" + n, number: n, lines: items, total: items.reduce((s, l) => s + l.qty * l.price, 0), status: "delivered", createdAt: t, paidAt: t, readyAt: t + 240000, deliveredAt: t + 300000, lang: "en-IN" });
+const chai = (q) => ({ id: "chai", name: "Chai", qty: q, price: 10 }), dosa = (q) => ({ id: "masala_dosa", name: "Masala Dosa", qty: q, price: 60 });
+const orders = []; let n = 0;
+for (let d = 1; d <= 6; d++) for (let i = 0; i < 5; i++) orders.push(o(++n, h - d * day + i * 60000, [chai(2), dosa(1)]));
+orders.push(o(++n, now - 60000, [chai(1)]));
+mkdirSync(dir, { recursive: true }); writeFileSync(join(dir, "state.json"), JSON.stringify({ orders, soldOut: [], kitchen: { mode: "station", chefs: [] } }));
+const { facts, briefing, answerRules, suggestions } = await import("../src/insights.js");
+const f = facts();
+assert.equal(f.today.orders, 1); assert.equal(f.today.revenue, 10);
+assert.equal(f.week.top[0].name, "Chai"); assert.equal(f.week.peakHour, 13);
+assert.ok(f.tomorrow.prep.length > 0);
+for (const l of ["en-IN", "hi-IN", "te-IN"]) { const b = briefing(f, l); assert.ok(b.text.length > 20 && !/undefined|NaN/.test(b.text), l); }
+assert.match(answerRules("when is it busiest", f, "en-IN"), /1 PM/);
+assert.match(answerRules("how much did I earn today", f, "en-IN"), /10 rupees/);
+assert.equal(answerRules("should I add a combo offer", f, "en-IN"), null);
+assert.ok(suggestions(f).some((s) => s.t === "prep"));
+console.log("insights ok");

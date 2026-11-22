@@ -1,0 +1,240 @@
+{
+ "id": "kirana",
+ "label": "Kirana / grocery store",
+ "kindLabel": "kirana (grocery) store",
+ "shop": "Lakshmi Kirana",
+ "fulfil": "pack",
+ "payWhen": "after",
+ "table": false,
+ "words": {
+  "staff": "Picker",
+  "staffPl": "Pickers",
+  "station": "Packing",
+  "working": "packing",
+  "setup": "Packing team"
+ },
+ "parserRole": "grocery shop order",
+ "examples": [
+  "\"one kilo rice and half kilo sugar\" -> {\"items\":{\"rice\":{\"q\":1,\"note\":\"\"},\"sugar\":{\"q\":0.5,\"note\":\"\"}},\"remove\":{},\"checkout\":false,\"clear\":false}",
+  "\"दो पैकेट मैगी और एक किलो पके हुए टमाटर, बस\" -> {\"items\":{\"maggi\":{\"q\":2,\"note\":\"\"},\"tomato\":{\"q\":1,\"note\":\"ripe\"}},\"remove\":{},\"checkout\":true,\"clear\":false}",
+  "\"250 grams dal, Tata salt one packet\" -> {\"items\":{\"toor_dal\":{\"q\":0.25,\"note\":\"\"},\"salt\":{\"q\":1,\"note\":\"Tata\"}},\"remove\":{},\"checkout\":false,\"clear\":false}",
+  "\"remove the sugar\" -> {\"items\":{},\"remove\":{\"sugar\":1},\"checkout\":false,\"clear\":false}"
+ ],
+ "items": [
+  {
+   "id": "rice",
+   "name": "Rice",
+   "aliases": [
+    "chawal",
+    "चावल",
+    "బియ్యం",
+    "biyyam"
+   ],
+   "price": 60,
+   "unit": "kg",
+   "step": 0.5,
+   "pop": 14,
+   "stock": 12
+  },
+  {
+   "id": "atta",
+   "name": "Wheat Flour (Atta)",
+   "aliases": [
+    "atta",
+    "flour",
+    "आटा",
+    "గోధుమ పిండి"
+   ],
+   "price": 45,
+   "unit": "kg",
+   "step": 0.5,
+   "pop": 12,
+   "stock": 25
+  },
+  {
+   "id": "sugar",
+   "name": "Sugar",
+   "aliases": [
+    "cheeni",
+    "चीनी",
+    "పంచదార",
+    "chakkara"
+   ],
+   "price": 44,
+   "unit": "kg",
+   "step": 0.5,
+   "pop": 14,
+   "stock": 30
+  },
+  {
+   "id": "toor_dal",
+   "name": "Toor Dal",
+   "aliases": [
+    "dal",
+    "arhar",
+    "दाल",
+    "కందిపప్పు"
+   ],
+   "price": 150,
+   "unit": "kg",
+   "step": 0.25,
+   "pop": 9,
+   "stock": 6
+  },
+  {
+   "id": "oil",
+   "name": "Sunflower Oil",
+   "aliases": [
+    "oil",
+    "tel",
+    "तेल",
+    "నూనె"
+   ],
+   "price": 140,
+   "unit": "litre",
+   "step": 0.5,
+   "pop": 10,
+   "stock": 10
+  },
+  {
+   "id": "milk",
+   "name": "Milk",
+   "aliases": [
+    "doodh",
+    "दूध",
+    "పాలు"
+   ],
+   "price": 28,
+   "unit": "packet",
+   "step": 1,
+   "pop": 24,
+   "stock": 20
+  },
+  {
+   "id": "salt",
+   "name": "Salt",
+   "aliases": [
+    "namak",
+    "नमक",
+    "ఉప్పు"
+   ],
+   "price": 22,
+   "unit": "packet",
+   "step": 1,
+   "pop": 8,
+   "stock": 18
+  },
+  {
+   "id": "tea",
+   "name": "Tea Powder",
+   "aliases": [
+    "chai patti",
+    "चायपत्ती",
+    "టీ పౌడర్"
+   ],
+   "price": 90,
+   "unit": "packet",
+   "step": 1,
+   "pop": 7,
+   "stock": 14
+  },
+  {
+   "id": "maggi",
+   "name": "Maggi Noodles",
+   "aliases": [
+    "maggi",
+    "noodles",
+    "मैगी"
+   ],
+   "price": 14,
+   "unit": "packet",
+   "step": 1,
+   "pop": 18,
+   "stock": 40
+  },
+  {
+   "id": "biscuits",
+   "name": "Biscuits",
+   "aliases": [
+    "biscuit",
+    "बिस्कुट",
+    "బిస్కెట్"
+   ],
+   "price": 10,
+   "unit": "packet",
+   "step": 1,
+   "pop": 16,
+   "stock": 50
+  },
+  {
+   "id": "soap",
+   "name": "Bath Soap",
+   "aliases": [
+    "soap",
+    "साबुन",
+    "సబ్బు"
+   ],
+   "price": 38,
+   "unit": "piece",
+   "step": 1,
+   "pop": 6,
+   "stock": 22
+  },
+  {
+   "id": "eggs",
+   "name": "Eggs",
+   "aliases": [
+    "egg",
+    "अंडे",
+    "గుడ్లు"
+   ],
+   "price": 7,
+   "unit": "piece",
+   "step": 1,
+   "pop": 15,
+   "stock": 60
+  },
+  {
+   "id": "onion",
+   "name": "Onion",
+   "aliases": [
+    "pyaz",
+    "प्याज",
+    "ఉల్లిపాయ"
+   ],
+   "price": 35,
+   "unit": "kg",
+   "step": 0.5,
+   "pop": 13,
+   "stock": 20
+  },
+  {
+   "id": "tomato",
+   "name": "Tomato",
+   "aliases": [
+    "tamatar",
+    "टमाटर",
+    "టమాటా"
+   ],
+   "price": 40,
+   "unit": "kg",
+   "step": 0.5,
+   "pop": 11,
+   "stock": 15
+  },
+  {
+   "id": "potato",
+   "name": "Potato",
+   "aliases": [
+    "aloo",
+    "आलू",
+    "బంగాళదుంప"
+   ],
+   "price": 30,
+   "unit": "kg",
+   "step": 0.5,
+   "pop": 12,
+   "stock": 25
+  }
+ ]
+}

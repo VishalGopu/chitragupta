@@ -1,0 +1,127 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chitragupta Owner</title>
+<style>
+:root{--bg:#0b1220;--card:#141c2e;--fg:#e8eefc;--mut:#8b97b5;--acc:#2dd4bf}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:18px system-ui,sans-serif;padding:14px;max-width:640px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center}h1{margin:0}.mut{color:var(--mut);font-size:15px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.c{background:var(--card);border-radius:16px;padding:16px}.c b{font-size:30px;display:block}
+button{font:inherit;border:0;border-radius:12px;padding:12px 16px;background:var(--acc);color:#04201c;font-weight:700;cursor:pointer}button.ghost{background:#26314d;color:var(--fg);padding:6px 10px;font-size:13px}
+h2{margin:26px 0 6px}.crow{background:var(--card);border-radius:14px;padding:12px;margin:10px 0}.crow input,.crow select,#mode{font:inherit;background:#0e1626;color:var(--fg);border:1px solid #26314d;border-radius:10px;padding:8px}
+.crow .r1{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.crow input{flex:1;min-width:120px}.sk{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.sk span{background:#1d2740;padding:5px 10px;border-radius:999px;font-size:14px;cursor:pointer}.sk span.on{background:var(--acc);color:#04201c;font-weight:700}
+#txt{background:var(--card);border-radius:16px;padding:16px;line-height:1.5}
+.bar{display:flex;align-items:flex-end;gap:6px;height:110px;margin-top:8px}.bar div{flex:1;text-align:center;font-size:11px;color:var(--mut)}.bar i{display:block;background:var(--acc);border-radius:5px 5px 0 0;min-height:2px}
+.talk{width:100%;padding:18px;font-size:20px;border-radius:16px}.talk.rec{background:#f87171}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.chips span{background:#1d2740;padding:6px 11px;border-radius:999px;font-size:14px;cursor:pointer}
+.qa{background:var(--card);border-radius:14px;padding:12px;margin:8px 0}.qa .q{color:var(--mut);font-size:15px}.tip{background:#12303a;border-left:4px solid var(--acc);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:16px}
+#olang{font:inherit;background:#0e1626;color:var(--fg);border:1px solid #26314d;border-radius:10px;padding:6px}.it{background:var(--card);border-radius:14px;padding:10px;margin:8px 0;display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:6px}.it input,.it select{font:inherit;background:#0e1626;color:var(--fg);border:1px solid #26314d;border-radius:8px;padding:6px;min-width:0}.it .al{grid-column:1/-1}.row2{display:flex;justify-content:space-between;padding:4px 0;font-size:16px}
+</style></head><body>
+<div class="top"><h1>📊 Chitragupta · Owner</h1><div><select id="olang"><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="te-IN">తెలుగు</option></select> <button class="ghost" id="role">↩ role</button> <button class="ghost" id="srv">⚙ server</button></div></div>
+<h2 style="margin-top:14px">☀️ Briefing</h2>
+<div id="txt" class="mut">Loading…</div><div id="tips"></div><p><button id="play">🔊 Read it to me</button></p>
+<h2>🎤 Ask Chitragupta</h2>
+<button class="talk" id="talk">🎤 Hold to ask</button>
+<div class="chips" id="chips"></div>
+<div style="display:flex;gap:8px"><input id="qin" placeholder="…or type a question" style="flex:1;font:inherit;background:#0e1626;color:var(--fg);border:1px solid #26314d;border-radius:10px;padding:10px"><button id="ask">Ask</button></div>
+<div id="hist"></div>
+<h2>📈 Numbers</h2>
+<div class="cards"><div class="c"><span class="mut">Orders today</span><b id="n">–</b><span class="mut" id="nd"></span></div><div class="c"><span class="mut">Revenue today</span><b id="rev">–</b><span class="mut" id="rd"></span></div>
+<div class="c"><span class="mut">Avg wait</span><b id="wait">–</b></div><div class="c"><span class="mut">Busiest hour</span><b id="peak">–</b></div></div>
+<div class="c"><span class="mut">Last 7 days · revenue ₹</span><div class="bar" id="bars"></div></div>
+<div class="c" style="margin-top:10px" id="stockBox"><span class="mut">Stock · days left</span><div id="stockList"></div></div>
+<div class="c" style="margin-top:10px"><span class="mut">Best sellers this week</span><div id="topw"></div></div>
+<h2>🏪 My shop</h2>
+<div class="c" id="codeBox" style="display:none;margin-bottom:10px"><span class="mut">Shop code — enter it on counter &amp; kitchen phones</span><b id="scode" style="letter-spacing:5px"></b><span class="mut" id="usage"></span></div>
+<p><label class="mut">Shop type&nbsp;</label><select id="shopType"></select> <span class="mut" id="shopNote"></span></p>
+<div id="cat"></div>
+<p><button class="ghost" id="addItem">＋ Add item</button> <button id="saveCat">Save catalog</button> <span class="mut" id="csave"></span></p>
+<p class="mut">Stock: leave blank if you don't track an item. Names people say (aliases) help voice ordering — separate with commas, any language.</p>
+<h2 id="kh">👨‍🍳 Kitchen setup</h2>
+<p class="mut">Each person gets one task at a time on their own phone, spoken to them. Finishing a task gives them the next one.</p>
+<p><label class="mut">How work is split&nbsp;</label><select id="mode"><option value="station">By item — chefs own dishes, help others when free</option><option value="order">By order — one chef cooks a whole order</option></select></p>
+<div id="chefs"></div>
+<p><button class="ghost" id="addChef">＋ Add team member</button> <button id="saveK">Save kitchen</button> <span class="mut" id="ksave"></span></p>
+<script type="module">
+import { say, get, post, setServer, events, goRole, recordWav } from "/common.js";
+import { fmtQty } from "/units.js";
+setServer(false);
+const $ = (id) => document.getElementById(id); let brief = null;
+const LS = { get: (k, d) => { try { return localStorage.getItem(k) || d; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+let P = { words: {}, shops: [] };
+let lang = LS.get("olang", "en-IN"); $("olang").value = lang;
+const Q = { "en-IN": ["How much did I earn today?", "What should I prepare tomorrow?", "Which item sells the most?", "When is it busiest?"], "hi-IN": ["आज कितनी कमाई हुई?", "कल क्या तैयार करूं?", "सबसे ज़्यादा क्या बिकता है?"], "te-IN": ["ఈరోజు ఎంత సంపాదించాను?", "రేపు ఏమి సిద్ధం చేయాలి?", "ఏది ఎక్కువ అమ్ముడవుతుంది?"] };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" })[c]);
+const pct = (a, b) => (b ? (a >= b ? "▲ " : "▼ ") + Math.abs(Math.round((a - b) / b * 100)) + "% vs yesterday so far" : "");
+function chips() { const qs = (Q[lang] || Q["en-IN"]).map((q) => (P.fulfil === "pack" && q === "What should I prepare tomorrow?" ? "What is running low?" : q)); $("chips").innerHTML = qs.map((q) => `<span>${q}</span>`).join(""); }
+$("chips").onclick = (e) => { if (e.target.tagName === "SPAN") ask({ text: e.target.textContent }); };
+$("olang").onchange = () => { lang = $("olang").value; LS.set("olang", lang); chips(); loadBrief(); };
+async function loadBrief() { try { brief = await get("/api/briefing?lang=" + lang); $("txt").textContent = brief.text; $("txt").className = ""; $("tips").innerHTML = (brief.tips || []).map((t) => `<div class="tip">💡 ${esc(t)}</div>`).join(""); } catch { $("txt").textContent = "Can't reach server — tap ⚙ server"; } }
+async function loadNums() {
+  try { const { facts: f } = await get("/api/insights");
+    $("n").textContent = f.today.orders; $("nd").textContent = pct(f.today.orders, f.yesterday.ordersByNow);
+    $("rev").textContent = "₹" + f.today.revenue; $("rd").textContent = pct(f.today.revenue, f.yesterday.revenueByNow);
+    $("wait").textContent = f.today.avgWaitMin != null ? f.today.avgWaitMin + " min" : "–"; $("peak").textContent = f.week.peakHour != null ? f.week.peakHour + ":00" : "–";
+    const mx = Math.max(1, ...f.week.perDay.map((d) => d.revenue));
+    $("bars").innerHTML = f.week.perDay.map((d) => `<div><i style="height:${Math.round(d.revenue / mx * 80)}px"></i>${d.label}</div>`).join("");
+    $("stockBox").style.display = f.stock?.length ? "" : "none"; $("stockList").innerHTML = (f.stock || []).slice(0, 6).map((x) => `<div class="row2"><span>${esc(x.name)}</span><b style="color:${x.daysLeft != null && x.daysLeft <= 2 || x.stock <= 0 ? "#f87171" : "inherit"}">${fmtQty(x.stock, x.unit)}${x.daysLeft != null ? " · " + x.daysLeft + "d" : ""}</b></div>`).join("");
+    $("topw").innerHTML = f.week.top.map((t) => `<div class="row2"><span>${esc(t.name)}</span><b>${t.qty}</b></div>`).join("") || '<span class="mut">No data yet</span>';
+  } catch {}
+}
+$("play").onclick = async () => { try { const b = await get("/api/briefing?audio=1&lang=" + lang); say(b.audio, b.text, lang); } catch {} };
+async function ask(p) {
+  const id = "q" + Date.now(); $("hist").insertAdjacentHTML("afterbegin", `<div class="qa" id="${id}"><div class="q">${p.text ? esc(p.text) : "🎤 …"}</div><div class="a mut">Thinking…</div></div>`);
+  try { const r = await post("/api/copilot", { ...p, lang }); const el = $(id); el.querySelector(".q").textContent = r.heard || p.text || ""; const a = el.querySelector(".a"); a.className = "a"; a.textContent = r.error || r.answer; if (!r.error) say(r.audio, r.answer, r.lang); }
+  catch (e) { $(id).querySelector(".a").textContent = "Failed: " + e.message; }
+}
+$("ask").onclick = () => { const t = $("qin").value.trim(); if (t) { $("qin").value = ""; ask({ text: t }); } };
+$("qin").onkeydown = (e) => { if (e.key === "Enter") $("ask").onclick(); };
+let stop = null; const talk = $("talk");
+const down = (e) => { e.preventDefault(); if (stop) return; let rel; const p = new Promise((r) => (rel = r)); stop = rel; talk.classList.add("rec"); talk.textContent = "● Listening… release to send";
+  recordWav(p).then((wav) => { stop = null; talk.classList.remove("rec"); talk.textContent = "🎤 Hold to ask"; ask({ audio: wav }); }).catch((err) => { stop = null; talk.classList.remove("rec"); talk.textContent = "🎤 Hold to ask"; $("hist").insertAdjacentHTML("afterbegin", `<div class="qa"><div class="a">Mic: ${esc(err.message)}</div></div>`); }); };
+const up = () => stop && stop();
+talk.onmousedown = down; talk.ontouchstart = down; talk.onmouseup = up; talk.onmouseleave = up; talk.ontouchend = up;
+$("role").onclick = goRole; $("srv").onclick = () => { setServer(true); location.reload(); };
+events((e) => { if (e.type === "update" || e.type === "order") { loadNums(); } });
+chips(); loadBrief(); loadNums(); loadShop(); loadInfo();
+
+// ---- shop type + catalog
+let items = [];
+const UNITS = ["plate", "piece", "cup", "glass", "packet", "kg", "litre"], stepFor = (u) => (u === "kg" || u === "litre" ? 0.5 : 1);
+function drawCat() {
+  $("cat").innerHTML = items.map((i, n) => `<div class="it"><input data-n="${n}" data-f="name" value="${esc(i.name)}" placeholder="Item name"><select data-n="${n}" data-f="unit">${UNITS.map((u) => `<option ${u === i.unit ? "selected" : ""}>${u}</option>`).join("")}</select>
+    <input data-n="${n}" data-f="price" type="number" min="0" value="${i.price}" title="Price per unit ₹"><input data-n="${n}" data-f="stock" type="number" min="0" step="any" value="${i.stock ?? ""}" placeholder="stock" title="Stock left (blank = not tracked)"><button class="ghost" data-rm="${n}">✕</button>
+    <input class="al" data-n="${n}" data-f="aliases" value="${esc((i.aliases || []).join(", "))}" placeholder="Other names people say (comma separated)"></div>`).join("");
+}
+$("cat").oninput = (e) => { const d = e.target.dataset; if (d.f == null) return; const it = items[+d.n]; it[d.f] = d.f === "price" ? +e.target.value : d.f === "stock" ? (e.target.value === "" ? null : +e.target.value) : e.target.value; if (d.f === "unit") it.step = stepFor(it.unit); };
+$("cat").onclick = (e) => { const r = e.target.closest("[data-rm]")?.dataset.rm; if (r != null) { items.splice(+r, 1); drawCat(); } };
+$("addItem").onclick = () => { items.push({ name: "", unit: P.fulfil === "pack" ? "packet" : "plate", step: P.fulfil === "pack" ? 1 : 1, price: 0, stock: null, aliases: [] }); drawCat(); };
+$("saveCat").onclick = async () => { try { const r = await post("/api/catalog", { items: items.filter((i) => i.name.trim()).map((i) => ({ ...i, aliases: typeof i.aliases === "string" ? i.aliases.split(",") : i.aliases })) }); if (r.error) throw new Error(r.error); items = r.menu.items; drawCat(); $("csave").textContent = "Saved ✔ " + new Date().toLocaleTimeString(); loadNums(); } catch (e) { $("csave").textContent = "Failed: " + e.message; } };
+$("shopType").onchange = async () => { const r = await post("/api/shop", { profile: $("shopType").value }); if (r.error) { $("shopNote").textContent = r.error; $("shopType").value = P.id; return; } location.reload(); };
+async function loadInfo() { try { const i = await get("/api/shop-info"); if (i.code) { $("codeBox").style.display = ""; $("scode").textContent = i.code; }
+  const u = i.usage, t = u.today || {}, L = u.limits; $("usage").textContent = `Today: voice ${t.stt || 0}/${L.stt} · speech ${t.tts || 0}/${L.tts} chars · model ${t.llm || 0}/${L.llm}`; $("usage").style.display = "block"; } catch {} }
+async function loadShop() { try { const c = await get("/api/config"); P = c.profile; chips(); items = c.menu.items.map((i) => ({ ...i, aliases: [...(i.aliases || [])] })); const w = P.words || {};
+  $("shopType").innerHTML = P.shops.map((x) => `<option value="${x.id}" ${x.id === P.id ? "selected" : ""}>${x.label}</option>`).join("");
+  $("kh").textContent = (P.fulfil === "pack" ? "🧺 " : "👨‍🍳 ") + (w.setup || "Kitchen setup"); $("mode").parentElement.style.display = P.fulfil === "pack" ? "none" : "";
+  $("shopNote").textContent = (P.payWhen === "after" ? "customer pays after the order is ready" : "customer pays first") + " · " + (P.fulfil === "pack" ? "slips go to a picker" : "orders go to the kitchen"); drawCat(); } catch {} }
+// ---- kitchen setup
+let K = { mode: "station", chefs: [] }, dishes = [];
+const LANGS = [["en-IN", "English"], ["hi-IN", "हिन्दी"], ["te-IN", "తెలుగు"]];
+function drawK() {
+  $("mode").value = K.mode;
+  $("chefs").innerHTML = K.chefs.map((c, i) => `<div class="crow"><div class="r1"><input data-i="${i}" data-f="name" value="${c.name}" placeholder="Name"><select data-i="${i}" data-f="lang">${LANGS.map(([v, n]) => `<option value="${v}" ${c.lang === v ? "selected" : ""}>${n}</option>`).join("")}</select><button class="ghost" data-del="${i}">✕</button></div>
+    ${K.mode === "station" ? `<div class="mut" style="margin-top:10px">Owns — cooks these first:</div><div class="sk">${dishes.map((d) => `<span class="${c.skills.includes(d.id) ? "on" : ""}" data-i="${i}" data-sk="${d.id}">${d.name}</span>`).join("")}</div>
+      <div class="mut" style="margin-top:10px">Also cooks when idle — second choice:</div><div class="sk">${dishes.filter((d) => !c.skills.includes(d.id)).map((d) => `<span class="${(c.also || []).includes(d.id) ? "on" : ""}" data-i="${i}" data-ak="${d.id}">${d.name}</span>`).join("") || '<span class="mut">(owns everything)</span>'}</div>
+      <label class="mut" style="display:block;margin-top:10px"><input type="checkbox" data-i="${i}" data-any ${c.helpAny !== false ? "checked" : ""}> …and any other dish if nothing above is waiting</label>` : `<div class="mut" style="margin-top:8px">Takes whole orders, any item</div>`}</div>`).join("") || `<p class="mut">No chefs yet — add one.</p>`;
+}
+async function loadK() { try { K = await get("/api/kitchen/config"); dishes = (await get("/api/config")).menu.items; K.chefs.forEach((c) => { c.skills = c.skills || []; c.also = c.also || []; }); drawK(); } catch {} }
+$("mode").onchange = () => { K.mode = $("mode").value; drawK(); };
+$("chefs").oninput = (e) => { const d = e.target.dataset; if (d.f) K.chefs[+d.i][d.f] = e.target.value; };
+$("chefs").onclick = (e) => { const d = e.target.closest("[data-del],[data-sk],[data-ak]")?.dataset; if (!d) return;
+  const toggle = (arr, v) => { const k = arr.indexOf(v); k < 0 ? arr.push(v) : arr.splice(k, 1); };
+  if (d.del != null) K.chefs.splice(+d.del, 1);
+  else if (d.sk) { const c = K.chefs[+d.i]; toggle(c.skills, d.sk); c.also = (c.also || []).filter((x) => x !== d.sk); }
+  else { const c = K.chefs[+d.i]; c.also = c.also || []; toggle(c.also, d.ak); }
+  drawK(); };
+$("chefs").onchange = (e) => { if (e.target.dataset.any != null) K.chefs[+e.target.dataset.i].helpAny = e.target.checked; };
+$("addChef").onclick = () => { if (K.chefs.length < 12) K.chefs.push({ name: (P.words?.staff || "Chef") + " " + (K.chefs.length + 1), lang: "en-IN", skills: [], also: [], helpAny: true }); drawK(); };
+$("saveK").onclick = async () => { try { const r = await post("/api/kitchen/config", { mode: K.mode, chefs: K.chefs.map(({ id, name, lang, skills, also, helpAny }) => ({ id, name, lang, skills, also, helpAny })) }); K = r; $("ksave").textContent = "Saved ✔ " + new Date().toLocaleTimeString(); drawK(); } catch (e) { $("ksave").textContent = "Failed: " + e.message; } };
+loadK();
+</script></body></html>

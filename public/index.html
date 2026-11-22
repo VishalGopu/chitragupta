@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chitragupta for Shops</title>
+<style>
+:root{--bg:#0b1220;--card:#141c2e;--fg:#e8eefc;--mut:#8b97b5;--acc:#2dd4bf}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px system-ui,sans-serif;min-height:100vh;display:grid;place-items:center;padding:16px}
+.w{max-width:420px;width:100%}h1{margin:0 0 4px}.mut{color:var(--mut);font-size:15px}
+a.t{display:block;background:var(--card);color:var(--fg);text-decoration:none;border-radius:18px;padding:20px;margin:12px 0;border:2px solid transparent}
+a.t:active,a.t:hover{border-color:var(--acc)}a.t b{font-size:22px}
+.card{background:var(--card);border-radius:18px;padding:18px;margin:12px 0}input,select{font:inherit;width:100%;box-sizing:border-box;margin:6px 0;padding:12px;border-radius:12px;border:1px solid #26314d;background:#0e1626;color:var(--fg)}
+button{font:inherit;border:0;border-radius:12px;padding:12px 16px;background:var(--acc);color:#04201c;font-weight:700;cursor:pointer;width:100%;margin-top:6px}button.ghost{background:#26314d;color:var(--fg)}
+.code{font-size:34px;letter-spacing:6px;text-align:center;font-weight:800;color:var(--acc)}.hide{display:none}.err{color:#f87171;min-height:22px}
+</style></head><body><div class="w"><h1>🤖 Chitragupta for Shops</h1>
+<div id="join" class="hide">
+  <div class="card"><b>Join your shop</b><div class="mut">Enter the shop code from the owner's phone</div><input id="code" placeholder="SHOP CODE" maxlength="8" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:4px;text-align:center"><button id="go">Join</button></div>
+  <div class="card"><b>New shop?</b><div class="mut">Create it in a minute</div><input id="nm" placeholder="Shop name"><select id="ty"></select><input id="pin" placeholder="Owner PIN (4–6 digits)" inputmode="numeric" maxlength="6" type="password"><button class="ghost" id="mk">Create shop</button></div>
+  <div class="err" id="err"></div>
+</div>
+<div id="made" class="card hide"><b>Your shop is ready 🎉</b><div class="mut">Give this code to your counter and kitchen phones</div><div class="code" id="mcode"></div><button id="cont">Continue</button></div>
+<div class="card"><b>Server</b><div class="mut" id="connection">Checking connection…</div><button class="ghost" id="server">⚙ Change server</button></div>
+<div id="roles"><p class="mut" id="sub">Which device is this?</p>
+<a class="t" href="counter.html" data-r="counter"><b>🎤 Counter</b><br><span class="mut">Customers speak, pay with UPI</span></a>
+<a class="t" href="kitchen.html" data-r="kitchen"><b>👨‍🍳 Kitchen</b><br><span class="mut">Live orders, mark ready, sold-out</span></a>
+<a class="t" href="owner.html" data-r="owner"><b>📊 Owner</b><br><span class="mut">Daily summary and insights</span></a>
+<p class="mut hide" id="leaveBox"><a href="#" id="leave" style="color:var(--mut)">Leave this shop</a></p></div></div>
+<script>
+try { const q = new URLSearchParams(location.search);
+  document.querySelectorAll("a.t").forEach((a) => a.addEventListener("click", () => { localStorage.setItem("role", a.dataset.r); sessionStorage.setItem("role", a.dataset.r); }));
+  const r = localStorage.getItem("role"); if (r && !q.has("pick") && (localStorage.multi !== "1" || localStorage.getItem("tok_" + r))) location.replace(r + ".html"); } catch {}
+</script>
+<script type="module">
+import { base, get, post, setServer } from "/common.js";
+setServer(false);
+const $ = (id) => document.getElementById(id), ls = { g: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, s: (k, v) => { try { localStorage.setItem(k, v); } catch {} }, d: (k) => { try { localStorage.removeItem(k); } catch {} } };
+const err = (t) => ($("err").textContent = t || "");
+const target = base() || location.origin;
+$("connection").textContent = "Checking " + target + "…";
+$("server").onclick = () => { if (setServer(true)) location.reload(); };
+let multi = false;
+async function join(role, code, pin) { const r = await post("/api/join", { code, role, pin }); if (r.error) throw new Error(r.error); ls.s("tok_" + role, r.token); ls.s("role", role); try { sessionStorage.setItem("role", role); } catch {} ls.s("code", code); return r; }
+function show() { const has = !!ls.g("code"); $("join").classList.toggle("hide", !(multi && !has)); $("roles").classList.toggle("hide", multi && !has); $("leaveBox").classList.toggle("hide", !(multi && has)); }
+try {
+  const m = await get("/api/mode"); if (m.error) throw new Error(m.error);
+  $("connection").textContent = "Connected to " + target;
+  multi = !!m.multi; ls.s("multi", multi ? "1" : "0");
+  if (multi) { $("ty").innerHTML = m.types.map((t) => `<option value="${t.id}">${t.label}</option>`).join(""); show(); }
+  else { const c = await get("/api/config"), w = c.profile.words || {}, pk = c.profile.fulfil === "pack";
+    document.querySelector("h1").textContent = "🤖 " + c.menu.shop;
+    document.querySelector('[data-r="kitchen"]').innerHTML = `<b>${pk ? "🧺" : "👨‍🍳"} ${w.station || "Kitchen"}</b><br><span class="mut">${pk ? "Slips to pick, tick items, mark not available" : "Live orders, mark ready, sold-out"}</span>`;
+    document.querySelector('[data-r="counter"]').innerHTML = `<b>🎤 Counter</b><br><span class="mut">${pk ? "Take the order by voice, then bill and collect" : "Customers speak, pay with UPI"}</span>`; }
+} catch (e) { $("connection").textContent = "Can't reach " + target + ": " + e.message; }
+$("go").onclick = () => { const c = $("code").value.trim().toUpperCase(); if (!c) return err("Enter the shop code"); err(); ls.s("code", c); show(); };
+$("mk").onclick = async () => { err(); const r = await post("/api/shops", { name: $("nm").value, profile: $("ty").value, pin: $("pin").value }); if (r.error) return err(r.error);
+  ls.s("code", r.shop.code); ls.s("tok_owner", r.token); $("join").classList.add("hide"); $("mcode").textContent = r.shop.code; $("made").classList.remove("hide"); $("roles").classList.add("hide"); };
+$("cont").onclick = () => { $("made").classList.add("hide"); show(); };
+$("leave").onclick = (e) => { e.preventDefault(); ["code", "role", "tok_counter", "tok_kitchen", "tok_owner"].forEach(ls.d); show(); };
+document.querySelectorAll("a.t").forEach((a) => a.addEventListener("click", async (e) => {      // multi-shop: sign this device in for the chosen role first
+  if (!multi) return; const role = a.dataset.r; if (ls.g("tok_" + role)) return; e.preventDefault();
+  try { const pin = role === "owner" ? prompt("Owner PIN") : undefined; if (role === "owner" && pin === null) return; await join(role, ls.g("code"), pin); location.href = a.getAttribute("href"); }
+  catch (x) { $("sub").textContent = x.message; if (/unknown shop/.test(x.message)) { ls.d("code"); show(); err(x.message); } } }));
+</script></body></html>
