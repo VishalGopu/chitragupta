@@ -58,11 +58,6 @@ test("a typed order becomes a priced cart and an order", async () => {
   await call(`/api/order/${o.json.order.id}/mock-pay`, { method: "POST", token: owner, body: {} });
   const paid = await call(`/api/order/${o.json.order.id}`, { token: owner }); assert.notEqual(paid.json.order.status, "awaiting_payment");
 });
-test("model-backed endpoints are rate limited", async () => {
-  let last; for (let i = 0; i < 8; i++) last = await call("/api/turn", { method: "POST", token: owner, body: { text: "chai", cart: [] } });
-  assert.equal(last.status, 429); assert.ok(last.headers.get("retry-after"));
-});
-
 test("one-tap demo shop returns tokens for every role and has history to analyse", async () => {
   const d = await call("/api/demo", { method: "POST", body: {} });
   assert.equal(d.status, 200); assert.deepEqual(Object.keys(d.json.tokens).sort(), ["counter", "kitchen", "owner"]);
@@ -70,4 +65,9 @@ test("one-tap demo shop returns tokens for every role and has history to analyse
   assert.equal(f.status, 200); assert.ok(f.json.facts.week.orders > 100, "two weeks of orders are loaded");
   const brief = await call("/api/briefing", { token: d.json.tokens.owner });
   assert.equal(brief.status, 200); assert.ok(brief.json.text.length > 20);
+});
+
+test("model-backed endpoints are rate limited", async () => {
+  let last; for (let i = 0; i < 8; i++) last = await call("/api/turn", { method: "POST", token: owner, body: { text: "chai", cart: [] } });
+  assert.equal(last.status, 429); assert.ok(last.headers.get("retry-after"));
 });
