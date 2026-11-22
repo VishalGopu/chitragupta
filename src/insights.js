@@ -1,7 +1,7 @@
 // Business insights for the owner: facts computed from the order log, deterministic suggestions, a spoken briefing,
 // and a rules-based answerer (used when no language model is reachable). All numbers come from here, never from a model.
 import { orders, menu, soldOut, isOut } from "./orders.js";
-import { fmtQty } from "../public/units.js";
+import { fmtQty } from "./units.js";
 const Tm = (o) => o.startedAt || o.paidAt;       // when the work began (pay-first: payment; pay-after: order taken)
 
 const DAY = 86400000;

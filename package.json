@@ -10,7 +10,11 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env src/server.js",
     "test": "node --test test/",
-    "test:coverage": "node --test --experimental-test-coverage test/"
+    "test:coverage": "node --test --experimental-test-coverage test/",
+    "build": "npm --prefix web ci && npm --prefix web run build",
+    "dev:web": "npm --prefix web run dev",
+    "test:web": "npm --prefix web test",
+    "test:all": "npm test && npm run test:web"
   },
   "dependencies": {
     "@google-cloud/firestore": "^8.7.1",

@@ -1,7 +1,8 @@
 import http from "node:http";
 import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { extname } from "node:path";
+import { extname, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { stt, tts, geminiEnabled, textModel } from "./google.js";
 import { wavDuration } from "./audio.js";
 import { createQr, verifyPaid, isMock } from "./pay.js";
@@ -11,7 +12,7 @@ import { demoState } from "./demo.js";
 import { createShop, shopByCode, getShop, listShops, publicShop, pinOkFor, issue, verify, can, locked, failed, cleared, signupAllowed, initRegistry, ROLES } from "./tenants.js";
 import { allowed, track, usageView } from "./usage.js";
 import { tenants, loadTenant, unloadTenant, flushAll, orders, menu, profiles, isOut, priceCart, createOrder, markPaid, settle, markOrderReady, markLine, markUnavailable, allocateDish, parseKitchen, cancelOrder, deliver, pinOk, setSoldOut, setShop, setCatalog } from "./orders.js";
-import { lineText } from "../public/units.js";
+import { lineText } from "./units.js";
 import { schedule, completeTask, transferTask, setOnline, freeChef, setKitchen, kitchenView, chefsView } from "./kitchen.js";
 import { facts, suggestions, briefing, answerRules, renderSuggestion, noHear, LANG_NAMES } from "./insights.js";
 import { ask, llmProvider } from "./llm.js";
@@ -19,7 +20,9 @@ import { parse, applyToCart } from "./parser.js";
 import { say, replyLang } from "./phrases.js";
 import { rateLimiter } from "./ratelimit.js";
 
-const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
+const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".txt": "text/plain", ".svg": "image/svg+xml", ".ico": "image/x-icon", ".png": "image/png", ".woff2": "font/woff2", ".map": "application/json" };
+// The Next.js front end, exported to static files by `npm run build` (web/out). WEB_DIR overrides the location (tests use a fixture).
+const WEB_ROOT = resolve(process.env.WEB_DIR || fileURLToPath(new URL("../web/out/", import.meta.url)));
 // Same-origin by default; set ALLOWED_ORIGIN to let another site call the API (requests are authenticated by bearer token, not cookies).
 const CORS = process.env.ALLOWED_ORIGIN ? { "Access-Control-Allow-Origin": process.env.ALLOWED_ORIGIN, "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", Vary: "Origin" } : {};
 const SECURITY = { "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Referrer-Policy": "no-referrer", "Permissions-Policy": "microphone=(self), camera=(), geolocation=()", "Cross-Origin-Opener-Policy": "same-origin",
@@ -212,10 +215,22 @@ async function app(req, res, url, role) {
 }
 
 async function serveStatic(res, pathname) {
-  const path = pathname === "/" ? "/index.html" : ["/counter", "/kitchen", "/owner", "/admin"].includes(pathname) ? pathname + ".html" : pathname;
-  if (path.includes("..")) return json(res, 400, {});
-  try { const buf = await readFile(new URL("../public" + path, import.meta.url)); res.writeHead(200, { "Content-Type": (types[extname(path)] || "application/octet-stream") + "; charset=utf-8", "Cache-Control": extname(path) === ".html" ? "no-cache" : "public, max-age=300", ...SECURITY }); res.end(buf); }
-  catch (e) { if (e.code === "ENOENT") return json(res, 404, { error: "not found" }); throw e; }
+  let rel; try { rel = decodeURIComponent(pathname); } catch { return json(res, 400, { error: "bad request" }); }
+  if (rel.includes("\0")) return json(res, 400, { error: "bad request" });
+  // "/counter" is served from counter.html; a path with an extension is a file
+  const candidates = rel === "/" ? ["/index.html"] : extname(rel) ? [rel] : [rel + ".html", rel + "/index.html"];
+  for (const c of candidates) {
+    const file = resolve(WEB_ROOT, "." + c);
+    if (file !== WEB_ROOT && !file.startsWith(WEB_ROOT + sep)) return json(res, 400, { error: "bad request" });   // path traversal
+    try {
+      const buf = await readFile(file), ext = extname(file);
+      res.writeHead(200, { "Content-Type": (types[ext] || "application/octet-stream") + (/^(text|application\/json)/.test(types[ext] || "") ? "; charset=utf-8" : ""),
+        "Cache-Control": rel.startsWith("/_next/static/") ? "public, max-age=31536000, immutable" : ext === ".html" ? "no-cache" : "public, max-age=300", ...SECURITY });
+      return res.end(buf);
+    } catch (e) { if (e.code !== "ENOENT" && e.code !== "EISDIR") throw e; }
+  }
+  try { const page = await readFile(resolve(WEB_ROOT, "404.html")); res.writeHead(404, { "Content-Type": "text/html; charset=utf-8", ...SECURITY }); return res.end(page); }
+  catch { return json(res, 404, { error: "not found (front end not built? run npm run build)" }); }
 }
 
 // ---- gateway: static files, signup/join (multi-shop mode), then authenticate -> pick the shop -> run the app inside that shop's context

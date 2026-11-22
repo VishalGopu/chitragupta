@@ -1,4 +1,4 @@
-// Quantity formatting shared by the server and the pages. Weight/volume units shrink to g/ml under 1; count units stay plain.
+// Quantity formatting for server-generated text. The front end has the same helpers in web/lib/units.ts. Weight/volume units shrink to g/ml under 1; count units stay plain.
 const r2 = (x) => Math.round(x * 100) / 100;
 export function fmtQty(q, unit, speak = false) {
   q = r2(+q || 0);
