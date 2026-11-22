@@ -1,7 +1,10 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Chitragupta Admin</title>
 <style>:root{--bg:#0b1220;--card:#141c2e;--fg:#e8eefc;--mut:#8b97b5;--acc:#2dd4bf}body{margin:0;background:var(--bg);color:var(--fg);font:16px system-ui,sans-serif;padding:14px;max-width:900px;margin:auto}
-table{width:100%;border-collapse:collapse}td,th{padding:8px 6px;border-bottom:1px solid #26314d;text-align:left}th{color:var(--mut);font-weight:500}.mut{color:var(--mut)}input,button{font:inherit;padding:10px;border-radius:10px;border:0}input{background:#0e1626;color:var(--fg);border:1px solid #26314d}button{background:var(--acc);color:#04201c;font-weight:700}</style></head><body>
-<h1>🛰 Chitragupta · all shops</h1><p><input id="k" type="password" placeholder="admin key"> <button id="go">Load</button> <span class="mut" id="m"></span></p>
+table{width:100%;border-collapse:collapse}td,th{padding:8px 6px;border-bottom:1px solid #26314d;text-align:left}th{color:var(--mut);font-weight:500}.mut{color:var(--mut)}input,button{font:inherit;padding:10px;border-radius:10px;border:0}input{background:#0e1626;color:var(--fg);border:1px solid #26314d}button{background:var(--acc);color:#04201c;font-weight:700}:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
+.skip{position:absolute;left:-999px;top:0;background:#fbbf24;color:#000;padding:10px 14px;z-index:99}.skip:focus{left:8px;top:8px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style></head><body><a class="skip" href="#main">Skip to main content</a>
+<h1 id="main" role="main" tabindex="-1">🛰 Chitragupta · all shops</h1><p><input id="k" type="password" placeholder="admin key" aria-label="admin key"> <button id="go">Load</button> <span class="mut" id="m"></span></p>
 <table><thead><tr><th>Shop</th><th>Type</th><th>Orders today</th><th>Revenue today</th><th>Voice calls today</th><th>Total orders</th></tr></thead><tbody id="b"></tbody></table>
 <script type="module">
 import { base } from "/common.js"; const $ = (i) => document.getElementById(i); $("k").value = sessionStorage.getItem("ak") || "";

@@ -12,18 +12,21 @@ button.ghost{background:#26314d;color:var(--fg)}#talk{width:100%;font-size:22px;
 table{width:100%;border-collapse:collapse}td{padding:6px 0;border-bottom:1px solid #26314d}td:last-child{text-align:right}td.q{white-space:nowrap;text-align:center}td.q button,td button.ghost{padding:2px 10px;font-size:18px}
 #qr img{width:260px;background:#fff;border-radius:12px;display:block;margin:10px auto}.big{font-size:56px;font-weight:800;text-align:center;color:var(--acc)}
 .row{display:flex;gap:8px;margin-top:10px}input{flex:1;font:inherit;padding:12px;border-radius:12px;border:1px solid #26314d;background:#0e1626;color:var(--fg)}
-</style></head><body>
-<div class="card"><h1 id="shop">Chitragupta</h1><div class="mut">Speak in any Indian language · hold the button and talk</div>
-<div style="text-align:right"><button class="ghost" id="role" style="padding:6px 10px;font-size:13px">↩ role</button> <button class="ghost" id="srv" style="padding:6px 10px;font-size:13px">⚙ server</button></div><div id="face">🤖</div><div id="say">Hi! What would you like to order?</div>
+:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
+.skip{position:absolute;left:-999px;top:0;background:#fbbf24;color:#000;padding:10px 14px;z-index:99}.skip:focus{left:8px;top:8px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style></head><body><a class="skip" href="#main">Skip to main content</a>
+<div class="card" id="main" role="main" tabindex="-1"><h1 id="shop">Chitragupta</h1><div class="mut">Speak in any Indian language · hold the button and talk</div>
+<div style="text-align:right"><button class="ghost" id="role" style="padding:6px 10px;font-size:13px">↩ role</button> <button class="ghost" id="srv" style="padding:6px 10px;font-size:13px">⚙ server</button></div><div id="face">🤖</div><div id="say" aria-live="polite">Hi! What would you like to order?</div>
 <button id="talk">🎤 Hold to speak</button>
-<div class="row"><input id="txt" placeholder="…or type (e.g. two dosa and a chai)"><button class="ghost" id="send">Send</button></div>
+<div class="row"><input id="txt" placeholder="…or type (e.g. two dosa and a chai)" aria-label="…or type (e.g. two dosa and a chai)"><button class="ghost" id="send">Send</button></div>
 <p class="mut">Tap to add:</p><div class="menu" id="menu"></div></div>
-<div class="card"><h2 style="margin-top:0">Your order</h2><table id="cart"></table><h2 id="total" style="text-align:right"></h2>
-<div class="row" id="tablebox" style="display:none"><input id="table" placeholder="Table number" inputmode="numeric"></div>
+<div class="card"><h2 style="margin-top:0">Your order</h2><table id="cart"></table><h2 id="total" aria-live="polite" style="text-align:right"></h2>
+<div class="row" id="tablebox" style="display:none"><input id="table" placeholder="Table number" inputmode="numeric" aria-label="Table number"></div>
 <div class="row"><button id="pay">Pay with UPI</button><button class="ghost" id="clear">Clear</button></div>
-<div id="qr"></div><div id="status" class="mut"></div><div id="pickup" class="mut" style="margin-top:14px;font-size:20px"></div></div>
+<div id="qr"></div><div id="status" aria-live="polite" class="mut"></div><div id="pickup" aria-live="polite" class="mut" style="margin-top:14px;font-size:20px"></div></div>
 <script type="module">
-import { recordWav, say, post, get, setServer, base, events, goRole, speakText } from "/common.js";
+import { recordWav, say, post, get, setServer, base, events, goRole, speakText, holdKeys } from "/common.js";
 import { fmtQty, unitPrice } from "/units.js";
 setServer(false);
 let cfg, cart = [], lang = "en-IN", orderId = null, poll = null, lines = [], total = 0;
@@ -81,7 +84,7 @@ let stop; const talk = $("talk");
 const start = async (e) => { e.preventDefault(); if (stop) return; talk.classList.add("rec"); talk.textContent = "● Listening… release to send"; let res; const p = new Promise((r) => (res = r)); stop = res;
   try { const wav = await recordWav(p); stop = null; talk.classList.remove("rec"); talk.textContent = "🎤 Hold to speak"; turn({ audio: wav }); } catch (err) { stop = null; talk.classList.remove("rec"); $("say").textContent = "Mic: " + err.message; } };
 const end = () => stop && stop();
-talk.onmousedown = talk.ontouchstart = start; talk.onmouseup = talk.onmouseleave = talk.ontouchend = end;
+talk.onmousedown = talk.ontouchstart = start; talk.onmouseup = talk.onmouseleave = talk.ontouchend = end; holdKeys(talk, start, end);
 $("pay").onclick = () => cart.length && checkout();
 async function checkout() {
   if (orderId || !cart.length) return;

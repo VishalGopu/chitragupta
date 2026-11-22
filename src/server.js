@@ -15,10 +15,14 @@ import { facts, suggestions, briefing, answerRules, renderSuggestion, noHear, LA
 import { ask, llmProvider } from "./llm.js";
 import { parse, applyToCart } from "./parser.js";
 import { say, replyLang } from "./phrases.js";
+import { rateLimiter } from "./ratelimit.js";
 
 const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
-const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Allow-Methods": "GET,POST,OPTIONS" };
-const json = (res, code, obj) => { res.writeHead(code, { "Content-Type": "application/json", ...CORS }); res.end(JSON.stringify(obj)); };
+// Same-origin by default; set ALLOWED_ORIGIN to let another site call the API (requests are authenticated by bearer token, not cookies).
+const CORS = process.env.ALLOWED_ORIGIN ? { "Access-Control-Allow-Origin": process.env.ALLOWED_ORIGIN, "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", Vary: "Origin" } : {};
+const SECURITY = { "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Referrer-Policy": "no-referrer", "Permissions-Policy": "microphone=(self), camera=(), geolocation=()", "Cross-Origin-Opener-Policy": "same-origin",
+  "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'" };
+const json = (res, code, obj) => { res.writeHead(code, { "Content-Type": "application/json", "Cache-Control": "no-store", ...SECURITY, ...CORS }); res.end(JSON.stringify(obj)); };
 const body = (req) => new Promise((ok, no) => { const c = []; let n = 0; req.on("data", (d) => { n += d.length; if (n > 8e6) { no(new Error("request too large")); req.destroy(); } else c.push(d); }); req.on("end", () => ok(Buffer.concat(c))); req.on("error", no); });
 const speak = async (text) => { if (!geminiEnabled() || !allowed("tts")) return null; try { const a = await tts(text); track("tts", text.length); return a; } catch (e) { console.warn(e.message); return null; } };
 // speech-to-text with the shop's daily quota and usage metering
@@ -130,7 +134,7 @@ async function app(req, res, url, role) {
     }
     if (req.method === "POST" && url.pathname === "/api/deliver") { const { number, pin, override } = JSON.parse((await body(req)).toString()); if (!override && !pinOk(number, pin)) return json(res, 403, { error: "wrong pickup code" }); const ok = !!deliver(number); if (ok) dispatch(); return json(res, 200, { delivered: ok }); }
 
-    if (url.pathname === "/api/events") { res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive", ...CORS }); res.write("retry: 2000\n\n"); const t = cur(); t.clients.add(res); req.on("close", () => t.clients.delete(res)); return; }
+    if (url.pathname === "/api/events") { res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive", ...SECURITY, ...CORS }); res.write("retry: 2000\n\n"); const t = cur(); t.clients.add(res); req.on("close", () => t.clients.delete(res)); return; }
     if (req.method === "POST" && url.pathname === "/api/soldout") { const { id, soldOut: v } = JSON.parse((await body(req)).toString()); const ok = setSoldOut(id, !!v); if (ok) emit("menu"); return json(res, ok ? 200 : 400, { ok }); }
     if (req.method === "POST" && url.pathname === "/api/tts") { const { text, lang } = JSON.parse((await body(req)).toString()); return json(res, 200, { audio: await speak(String(text || "").slice(0, 300), lang || KITCHEN_LANG) }); }
 
@@ -208,7 +212,7 @@ async function app(req, res, url, role) {
 async function serveStatic(res, pathname) {
   const path = pathname === "/" ? "/index.html" : ["/counter", "/kitchen", "/owner", "/admin"].includes(pathname) ? pathname + ".html" : pathname;
   if (path.includes("..")) return json(res, 400, {});
-  try { const buf = await readFile(new URL("./public" + path, import.meta.url)); res.writeHead(200, { "Content-Type": types[extname(path)] || "application/octet-stream" }); res.end(buf); }
+  try { const buf = await readFile(new URL("../public" + path, import.meta.url)); res.writeHead(200, { "Content-Type": (types[extname(path)] || "application/octet-stream") + "; charset=utf-8", "Cache-Control": extname(path) === ".html" ? "no-cache" : "public, max-age=300", ...SECURITY }); res.end(buf); }
   catch (e) { if (e.code === "ENOENT") return json(res, 404, { error: "not found" }); throw e; }
 }
 
@@ -216,6 +220,9 @@ async function serveStatic(res, pathname) {
 const clientIp = (req) => (process.env.TRUST_PROXY ? String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() : "") || req.socket.remoteAddress || "?";
 const summary = (id) => { const t = tenants.get(id), st = t || loadState(id) || {}, d0 = new Date().setHours(0, 0, 0, 0), list = (t ? t.orders : st.orders) || [], today = list.filter((o) => (o.paidAt || o.createdAt) >= d0 && o.status !== "cancelled");
   return { ordersToday: today.length, revenueToday: today.filter((o) => o.paidAt).reduce((s, o) => s + o.total, 0), ordersTotal: list.length, usage: (t ? t.usage : st.usage) || {}, loaded: !!t }; };
+const apiLimit = rateLimiter({ limit: +process.env.RATE_LIMIT_PER_MIN || 240 });
+const modelLimit = rateLimiter({ limit: +process.env.MODEL_LIMIT_PER_MIN || 60 });   // endpoints that call Gemini
+const MODEL_PATHS = new Set(["/api/turn", "/api/copilot", "/api/tts", "/api/briefing", "/api/ready"]);
 async function gateway(req, res) {
   const url = new URL(req.url, "http://x"), p = url.pathname;
   if (req.method === "OPTIONS") { res.writeHead(204, { ...CORS, ...(req.headers["access-control-request-private-network"] === "true" ? { "Access-Control-Allow-Private-Network": "true" } : {}) }); return res.end(); }
@@ -223,6 +230,8 @@ async function gateway(req, res) {
     if (p === "/api/health") return json(res, 200, { ok: true, multi: isMulti(), shopsLoaded: tenants.size });
     if (p === "/api/mode") return json(res, 200, { multi: isMulti(), types: Object.values(profiles).map((x) => ({ id: x.id, label: x.label })) });
     if (!p.startsWith("/api/")) return await serveStatic(res, p);
+    const ip = clientIp(req);
+    for (const lim of MODEL_PATHS.has(p) ? [apiLimit, modelLimit] : [apiLimit]) { const r = lim(ip); if (!r.ok) { res.setHeader?.("Retry-After", r.retryAfter); return json(res, 429, { error: "too many requests, slow down" }); } }
     let tenant, role = "owner";
     if (isMulti()) {
       if (req.method === "POST" && p === "/api/shops") {                               // create a shop

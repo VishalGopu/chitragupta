@@ -13,15 +13,18 @@ h2{margin:26px 0 6px}.crow{background:var(--card);border-radius:14px;padding:12p
 .talk{width:100%;padding:18px;font-size:20px;border-radius:16px}.talk.rec{background:#f87171}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.chips span{background:#1d2740;padding:6px 11px;border-radius:999px;font-size:14px;cursor:pointer}
 .qa{background:var(--card);border-radius:14px;padding:12px;margin:8px 0}.qa .q{color:var(--mut);font-size:15px}.tip{background:#12303a;border-left:4px solid var(--acc);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:16px}
 #olang{font:inherit;background:#0e1626;color:var(--fg);border:1px solid #26314d;border-radius:10px;padding:6px}.it{background:var(--card);border-radius:14px;padding:10px;margin:8px 0;display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:6px}.it input,.it select{font:inherit;background:#0e1626;color:var(--fg);border:1px solid #26314d;border-radius:8px;padding:6px;min-width:0}.it .al{grid-column:1/-1}.row2{display:flex;justify-content:space-between;padding:4px 0;font-size:16px}
-</style></head><body>
-<div class="top"><h1>📊 Chitragupta · Owner</h1><div><select id="olang"><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="te-IN">తెలుగు</option></select> <button class="ghost" id="role">↩ role</button> <button class="ghost" id="srv">⚙ server</button></div></div>
+:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
+.skip{position:absolute;left:-999px;top:0;background:#fbbf24;color:#000;padding:10px 14px;z-index:99}.skip:focus{left:8px;top:8px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style></head><body><a class="skip" href="#main">Skip to main content</a>
+<div class="top" id="main" role="main" tabindex="-1"><h1>📊 Chitragupta · Owner</h1><div><select id="olang" aria-label="Language"><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="te-IN">తెలుగు</option></select> <button class="ghost" id="role">↩ role</button> <button class="ghost" id="srv">⚙ server</button></div></div>
 <h2 style="margin-top:14px">☀️ Briefing</h2>
 <div id="txt" class="mut">Loading…</div><div id="tips"></div><p><button id="play">🔊 Read it to me</button></p>
 <h2>🎤 Ask Chitragupta</h2>
 <button class="talk" id="talk">🎤 Hold to ask</button>
 <div class="chips" id="chips"></div>
-<div style="display:flex;gap:8px"><input id="qin" placeholder="…or type a question" style="flex:1;font:inherit;background:#0e1626;color:var(--fg);border:1px solid #26314d;border-radius:10px;padding:10px"><button id="ask">Ask</button></div>
-<div id="hist"></div>
+<div style="display:flex;gap:8px"><input id="qin" placeholder="…or type a question" style="flex:1;font:inherit;background:#0e1626;color:var(--fg);border:1px solid #26314d;border-radius:10px;padding:10px" aria-label="…or type a question"><button id="ask">Ask</button></div>
+<div id="hist" aria-live="polite"></div>
 <h2>📈 Numbers</h2>
 <div class="cards"><div class="c"><span class="mut">Orders today</span><b id="n">–</b><span class="mut" id="nd"></span></div><div class="c"><span class="mut">Revenue today</span><b id="rev">–</b><span class="mut" id="rd"></span></div>
 <div class="c"><span class="mut">Avg wait</span><b id="wait">–</b></div><div class="c"><span class="mut">Busiest hour</span><b id="peak">–</b></div></div>
@@ -40,7 +43,7 @@ h2{margin:26px 0 6px}.crow{background:var(--card);border-radius:14px;padding:12p
 <div id="chefs"></div>
 <p><button class="ghost" id="addChef">＋ Add team member</button> <button id="saveK">Save kitchen</button> <span class="mut" id="ksave"></span></p>
 <script type="module">
-import { say, get, post, setServer, events, goRole, recordWav } from "/common.js";
+import { say, get, post, setServer, events, goRole, recordWav, holdKeys } from "/common.js";
 import { fmtQty } from "/units.js";
 setServer(false);
 const $ = (id) => document.getElementById(id); let brief = null;
@@ -77,7 +80,7 @@ let stop = null; const talk = $("talk");
 const down = (e) => { e.preventDefault(); if (stop) return; let rel; const p = new Promise((r) => (rel = r)); stop = rel; talk.classList.add("rec"); talk.textContent = "● Listening… release to send";
   recordWav(p).then((wav) => { stop = null; talk.classList.remove("rec"); talk.textContent = "🎤 Hold to ask"; ask({ audio: wav }); }).catch((err) => { stop = null; talk.classList.remove("rec"); talk.textContent = "🎤 Hold to ask"; $("hist").insertAdjacentHTML("afterbegin", `<div class="qa"><div class="a">Mic: ${esc(err.message)}</div></div>`); }); };
 const up = () => stop && stop();
-talk.onmousedown = down; talk.ontouchstart = down; talk.onmouseup = up; talk.onmouseleave = up; talk.ontouchend = up;
+talk.onmousedown = down; talk.ontouchstart = down; talk.onmouseup = up; talk.onmouseleave = up; talk.ontouchend = up; holdKeys(talk, down, up);
 $("role").onclick = goRole; $("srv").onclick = () => { setServer(true); location.reload(); };
 events((e) => { if (e.type === "update" || e.type === "order") { loadNums(); } });
 chips(); loadBrief(); loadNums(); loadShop(); loadInfo();
@@ -86,9 +89,9 @@ chips(); loadBrief(); loadNums(); loadShop(); loadInfo();
 let items = [];
 const UNITS = ["plate", "piece", "cup", "glass", "packet", "kg", "litre"], stepFor = (u) => (u === "kg" || u === "litre" ? 0.5 : 1);
 function drawCat() {
-  $("cat").innerHTML = items.map((i, n) => `<div class="it"><input data-n="${n}" data-f="name" value="${esc(i.name)}" placeholder="Item name"><select data-n="${n}" data-f="unit">${UNITS.map((u) => `<option ${u === i.unit ? "selected" : ""}>${u}</option>`).join("")}</select>
-    <input data-n="${n}" data-f="price" type="number" min="0" value="${i.price}" title="Price per unit ₹"><input data-n="${n}" data-f="stock" type="number" min="0" step="any" value="${i.stock ?? ""}" placeholder="stock" title="Stock left (blank = not tracked)"><button class="ghost" data-rm="${n}">✕</button>
-    <input class="al" data-n="${n}" data-f="aliases" value="${esc((i.aliases || []).join(", "))}" placeholder="Other names people say (comma separated)"></div>`).join("");
+  $("cat").innerHTML = items.map((i, n) => `<div class="it"><input data-n="${n}" data-f="name" value="${esc(i.name)}" placeholder="Item name" aria-label="Item name"><select data-n="${n}" data-f="unit">${UNITS.map((u) => `<option ${u === i.unit ? "selected" : ""}>${u}</option>`).join("")}</select>
+    <input data-n="${n}" data-f="price" type="number" min="0" value="${i.price}" title="Price per unit ₹"><input data-n="${n}" data-f="stock" type="number" min="0" step="any" value="${i.stock ?? ""}" placeholder="stock" title="Stock left (blank = not tracked)" aria-label="stock"><button class="ghost" data-rm="${n}">✕</button>
+    <input class="al" data-n="${n}" data-f="aliases" value="${esc((i.aliases || []).join(", "))}" placeholder="Other names people say (comma separated)" aria-label="Other names people say (comma separated)"></div>`).join("");
 }
 $("cat").oninput = (e) => { const d = e.target.dataset; if (d.f == null) return; const it = items[+d.n]; it[d.f] = d.f === "price" ? +e.target.value : d.f === "stock" ? (e.target.value === "" ? null : +e.target.value) : e.target.value; if (d.f === "unit") it.step = stepFor(it.unit); };
 $("cat").onclick = (e) => { const r = e.target.closest("[data-rm]")?.dataset.rm; if (r != null) { items.splice(+r, 1); drawCat(); } };
@@ -106,7 +109,7 @@ let K = { mode: "station", chefs: [] }, dishes = [];
 const LANGS = [["en-IN", "English"], ["hi-IN", "हिन्दी"], ["te-IN", "తెలుగు"]];
 function drawK() {
   $("mode").value = K.mode;
-  $("chefs").innerHTML = K.chefs.map((c, i) => `<div class="crow"><div class="r1"><input data-i="${i}" data-f="name" value="${c.name}" placeholder="Name"><select data-i="${i}" data-f="lang">${LANGS.map(([v, n]) => `<option value="${v}" ${c.lang === v ? "selected" : ""}>${n}</option>`).join("")}</select><button class="ghost" data-del="${i}">✕</button></div>
+  $("chefs").innerHTML = K.chefs.map((c, i) => `<div class="crow"><div class="r1"><input data-i="${i}" data-f="name" value="${c.name}" placeholder="Name" aria-label="Name"><select data-i="${i}" data-f="lang">${LANGS.map(([v, n]) => `<option value="${v}" ${c.lang === v ? "selected" : ""}>${n}</option>`).join("")}</select><button class="ghost" data-del="${i}">✕</button></div>
     ${K.mode === "station" ? `<div class="mut" style="margin-top:10px">Owns — cooks these first:</div><div class="sk">${dishes.map((d) => `<span class="${c.skills.includes(d.id) ? "on" : ""}" data-i="${i}" data-sk="${d.id}">${d.name}</span>`).join("")}</div>
       <div class="mut" style="margin-top:10px">Also cooks when idle — second choice:</div><div class="sk">${dishes.filter((d) => !c.skills.includes(d.id)).map((d) => `<span class="${(c.also || []).includes(d.id) ? "on" : ""}" data-i="${i}" data-ak="${d.id}">${d.name}</span>`).join("") || '<span class="mut">(owns everything)</span>'}</div>
       <label class="mut" style="display:block;margin-top:10px"><input type="checkbox" data-i="${i}" data-any ${c.helpAny !== false ? "checked" : ""}> …and any other dish if nothing above is waiting</label>` : `<div class="mut" style="margin-top:8px">Takes whole orders, any item</div>`}</div>`).join("") || `<p class="mut">No chefs yet — add one.</p>`;

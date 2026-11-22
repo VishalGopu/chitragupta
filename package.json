@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "node --env-file-if-exists=.env src/server.js",
-    "test": "node --test test/"
+    "test": "node --test test/",
+    "test:coverage": "node --test --experimental-test-coverage test/"
   },
   "dependencies": {
     "@google-cloud/firestore": "^8.7.1",

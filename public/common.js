@@ -60,3 +60,10 @@ export function events(on) { const t = token(); const es = new EventSource(base(
 export async function speakText(text, lang) { try { const r = await post("/api/tts", { text, lang }); say(r.audio, text, lang); } catch { say(null, text, lang); } }
 export function beep() { try { const a = new AudioContext(), o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 880; g.gain.value = 0.2; o.start(); o.stop(a.currentTime + 0.25); } catch {} }
 export const goRole = () => { try { localStorage.removeItem("role"); sessionStorage.removeItem("role"); } catch {} location.href = "index.html"; };
+
+/** Keyboard support for hold-to-talk buttons: holding Space or Enter behaves like holding the pointer down. */
+export const holdKeys = (el, down, up) => {
+  const hit = (e) => e.key === " " || e.key === "Enter";
+  el.addEventListener("keydown", (e) => { if (hit(e) && !e.repeat) down(e); });
+  el.addEventListener("keyup", (e) => { if (hit(e)) up(e); });
+};

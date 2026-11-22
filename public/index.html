@@ -9,10 +9,13 @@ a.t:active,a.t:hover{border-color:var(--acc)}a.t b{font-size:22px}
 .card{background:var(--card);border-radius:18px;padding:18px;margin:12px 0}input,select{font:inherit;width:100%;box-sizing:border-box;margin:6px 0;padding:12px;border-radius:12px;border:1px solid #26314d;background:#0e1626;color:var(--fg)}
 button{font:inherit;border:0;border-radius:12px;padding:12px 16px;background:var(--acc);color:#04201c;font-weight:700;cursor:pointer;width:100%;margin-top:6px}button.ghost{background:#26314d;color:var(--fg)}
 .code{font-size:34px;letter-spacing:6px;text-align:center;font-weight:800;color:var(--acc)}.hide{display:none}.err{color:#f87171;min-height:22px}
-</style></head><body><div class="w"><h1>🤖 Chitragupta for Shops</h1>
+:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
+.skip{position:absolute;left:-999px;top:0;background:#fbbf24;color:#000;padding:10px 14px;z-index:99}.skip:focus{left:8px;top:8px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style></head><body><a class="skip" href="#main">Skip to main content</a><div class="w" id="main" role="main" tabindex="-1"><h1>🤖 Chitragupta for Shops</h1>
 <div id="join" class="hide">
-  <div class="card"><b>Join your shop</b><div class="mut">Enter the shop code from the owner's phone</div><input id="code" placeholder="SHOP CODE" maxlength="8" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:4px;text-align:center"><button id="go">Join</button></div>
-  <div class="card"><b>New shop?</b><div class="mut">Create it in a minute</div><input id="nm" placeholder="Shop name"><select id="ty"></select><input id="pin" placeholder="Owner PIN (4–6 digits)" inputmode="numeric" maxlength="6" type="password"><button class="ghost" id="mk">Create shop</button></div>
+  <div class="card"><b>Join your shop</b><div class="mut">Enter the shop code from the owner's phone</div><input id="code" placeholder="SHOP CODE" maxlength="8" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:4px;text-align:center" aria-label="SHOP CODE"><button id="go">Join</button></div>
+  <div class="card"><b>New shop?</b><div class="mut">Create it in a minute</div><input id="nm" placeholder="Shop name" aria-label="Shop name"><select id="ty"></select><input id="pin" placeholder="Owner PIN (4–6 digits)" inputmode="numeric" maxlength="6" type="password" aria-label="Owner PIN (4–6 digits)"><button class="ghost" id="mk">Create shop</button></div>
   <div class="err" id="err"></div>
 </div>
 <div id="made" class="card hide"><b>Your shop is ready 🎉</b><div class="mut">Give this code to your counter and kitchen phones</div><div class="code" id="mcode"></div><button id="cont">Continue</button></div>
