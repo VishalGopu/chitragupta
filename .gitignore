@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+!.env.example
+data/
+*.apk
+apk/
+*.log
+coverage/
+.DS_Store

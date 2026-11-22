@@ -1,0 +1,13 @@
+{
+  "name": "chitragupta",
+  "version": "0.1.0",
+  "description": "AI order assistant for small shops, built with Gemini and Firestore",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "test": "node --test test/"
+  },
+  "dependencies": {}
+}
