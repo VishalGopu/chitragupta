@@ -15,6 +15,7 @@ button{font:inherit;border:0;border-radius:12px;padding:12px 16px;background:var
 </style></head><body><a class="skip" href="#main">Skip to main content</a><div class="w" id="main" role="main" tabindex="-1"><h1>🤖 Chitragupta for Shops</h1>
 <div id="join" class="hide">
   <div class="card"><b>Join your shop</b><div class="mut">Enter the shop code from the owner's phone</div><input id="code" placeholder="SHOP CODE" maxlength="8" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:4px;text-align:center" aria-label="SHOP CODE"><button id="go">Join</button></div>
+  <div class="card"><b>Just looking?</b><div class="mut">One tap opens a demo shop with two weeks of sample orders</div><button id="demo">Try the demo shop</button></div>
   <div class="card"><b>New shop?</b><div class="mut">Create it in a minute</div><input id="nm" placeholder="Shop name" aria-label="Shop name"><select id="ty"></select><input id="pin" placeholder="Owner PIN (4–6 digits)" inputmode="numeric" maxlength="6" type="password" aria-label="Owner PIN (4–6 digits)"><button class="ghost" id="mk">Create shop</button></div>
   <div class="err" id="err"></div>
 </div>
@@ -54,6 +55,8 @@ try {
 $("go").onclick = () => { const c = $("code").value.trim().toUpperCase(); if (!c) return err("Enter the shop code"); err(); ls.s("code", c); show(); };
 $("mk").onclick = async () => { err(); const r = await post("/api/shops", { name: $("nm").value, profile: $("ty").value, pin: $("pin").value }); if (r.error) return err(r.error);
   ls.s("code", r.shop.code); ls.s("tok_owner", r.token); $("join").classList.add("hide"); $("mcode").textContent = r.shop.code; $("made").classList.remove("hide"); $("roles").classList.add("hide"); };
+$("demo").onclick = async () => { err(); $("demo").disabled = true; const r = await post("/api/demo", {}); $("demo").disabled = false; if (r.error) return err(r.error);
+  ls.s("code", r.shop.code); for (const [role, t] of Object.entries(r.tokens)) ls.s("tok_" + role, t); show(); };
 $("cont").onclick = () => { $("made").classList.add("hide"); show(); };
 $("leave").onclick = (e) => { e.preventDefault(); ["code", "role", "tok_counter", "tok_kitchen", "tok_owner"].forEach(ls.d); show(); };
 document.querySelectorAll("a.t").forEach((a) => a.addEventListener("click", async (e) => {      // multi-shop: sign this device in for the chosen role first

@@ -1,11 +1,13 @@
 import http from "node:http";
+import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { extname } from "node:path";
 import { stt, tts, geminiEnabled, textModel } from "./google.js";
 import { wavDuration } from "./audio.js";
 import { createQr, verifyPaid, isMock } from "./pay.js";
 import { runIn, isMulti, cur } from "./tenant.js";
-import { loadState, preload, settled } from "./store.js";
+import { loadState, saveState, preload, settled } from "./store.js";
+import { demoState } from "./demo.js";
 import { createShop, shopByCode, getShop, listShops, publicShop, pinOkFor, issue, verify, can, locked, failed, cleared, signupAllowed, initRegistry, ROLES } from "./tenants.js";
 import { allowed, track, usageView } from "./usage.js";
 import { tenants, loadTenant, unloadTenant, flushAll, orders, menu, profiles, isOut, priceCart, createOrder, markPaid, settle, markOrderReady, markLine, markUnavailable, allocateDish, parseKitchen, cancelOrder, deliver, pinOk, setSoldOut, setShop, setCatalog } from "./orders.js";
@@ -240,6 +242,13 @@ async function gateway(req, res) {
         if (!signupAllowed(clientIp(req))) return json(res, 429, { error: "too many signups from this address, try later" });
         let shop; try { shop = await createShop(b); } catch (e) { return json(res, 400, { error: e.message }); }
         return json(res, 200, { shop: publicShop(shop), token: issue(shop.id, "owner"), role: "owner" });
+      }
+      if (req.method === "POST" && p === "/api/demo") {                                // one-tap demo: a fresh shop with two weeks of history, signed in on every role
+        if (!signupAllowed(clientIp(req))) return json(res, 429, { error: "too many signups from this address, try later" });
+        const b = JSON.parse((await body(req)).toString() || "{}"), type = profiles[b.profile] ? b.profile : "canteen";
+        const shop = await createShop({ name: "Demo " + profiles[type].label, profile: type, pin: String(1000 + (randomBytes(2).readUInt16BE() % 9000)) });
+        saveState(shop.id, { ...demoState(type), name: shop.name });
+        return json(res, 200, { shop: publicShop(shop), tokens: Object.fromEntries(ROLES.map((r) => [r, issue(shop.id, r)])) });
       }
       if (req.method === "POST" && p === "/api/join") {                                // pair a device with a shop code (+ owner PIN for the owner role)
         const b = JSON.parse((await body(req)).toString() || "{}"), key = clientIp(req) + ":" + String(b.code || "").toUpperCase();
